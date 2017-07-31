@@ -1,6 +1,7 @@
 import csv
 import sys
-#remove duplicates
+#removes duplicate entries in bed files(those that have the same information for the same sample at the same genomic location)
+#assumes that the first 3 columns are chrom, start, stop and the fourth column is sample id
 
 file = sys.argv[1]
 
@@ -17,3 +18,6 @@ with open(file, 'r') as f, open(file + '.noDuplicates', 'w') as csvout:
             writer.writerow(row)
         else:
             count += 1
+
+print ("There were %d duplicates found" %count)
+
