@@ -1,169 +1,162 @@
 
 # coding: utf-8
 
-# In[9]:
+# In[4]:
 
+import os
 import pandas as pd
-df = pd.read_csv('/Users/khandekara2/Documents/methylationProject/01_data/CosmicCompleteDifferentialMethylation.csv', header = None)
-
-
-# In[10]:
-
-df.head()
-
-
-# In[46]:
-
-df.columns = ['study_id', 'id_sample', 'sample_name', 'id_tumour', 'primary_site', 'site_subtype1', 'site_subtype2', 'site_subtype3', 'primary_histology',
-              'histology_subtype1', 'histology_subtype2', 'histology_subtype3', 'fragment_id', 'genome_version', 'chr', 'position', 'gene_name',
-              'methylation', 'avg_beta_value_normal', 'beta_value', 'p_value',]
-
-
-# In[12]:
-
-promoter = df[df.gene_name.str.contains('Promoter') == True]
-print len(promoter)
-
-
-# In[13]:
-
-gene = df[df.gene_name.dropna()]
-
-
-# In[38]:
-
-unclassified = df[df.gene_name.str.contains('Unclassified') == True]
-print len(unclassified)
+os.chdir('/Users/khandekara2/Documents/methylationProject/01_data/hotspots')
 
 
 # In[18]:
 
-gene_associated = df[df.gene_name.str.contains('Gene_Associated') == True]
-print len(gene_associated)
+df = pd.read_csv('cancer_cds_cpgs_table.tsv', sep='\t')
 
 
-# In[24]:
+# In[19]:
 
-nulls = df.isnull().values.sum()
-print nulls
+df.head()
+
+
+# In[22]:
+
+df.sort_values('Number of CpGs in CDS', inplace=True, ascending=False)
+
+
+# In[28]:
+
+df.head(20)
 
 
 # In[31]:
 
-coding = df[(df.gene_name.str.contains('Unclassified') == False) & (df.gene_name.str.contains('Promoter') == False)
-                & (df.gene_name.str.contains('Associated') == False) & (df.gene_name.str.contains('NaN') == False)]
-print len(coding)
-
-
-# In[40]:
-
-print len(coding) + nulls + len(unclassified) + len(promoter) + len(gene_associated)
-
-
-# In[27]:
-
-df.shape
-
-
-# In[32]:
-
-sum(pd.isnull(df['gene_name']))
-
-
-# In[44]:
-
-import matplotlib.pyplot as plt
 get_ipython().magic('matplotlib inline')
-labels = 'Unclassified', 'Coding Region', 'Missing', 'Promoter/Gene Associated'
-sizes = [len(unclassified), len(coding), nulls, len(promoter) + len(gene_associated)]
-explode = (0, 0, 0, 0)
-fig1, ax1 = plt.subplots()
-ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
-        shadow=True, startangle=90)
-ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
-plt.show()
+df.hist(column='Number of CpGs in CDS', bins=20)
 
 
-# In[49]:
+# In[29]:
 
-print len(df['id_sample'].unique())
-
-
-# In[50]:
-
-print len(df['id_tumour'].unique())
+tp53 = df[df['Gene'] == 'TP53']
 
 
-# In[56]:
+# In[30]:
 
-positions = list(df['position'])
-
-
-# In[53]:
-
-print positions
-
-    
-
-
-# In[57]:
-
-print len(positions)
-positions_set = set(positions)
-print len(positions_set)
-
-
-# In[69]:
-
-# first ensure there are no two identical CpG sites on different chromosomes
-import collections
-counter=collections.Counter(positions)
-repeat_positions = []
-for key in counter:
-    if counter[key] >= 465:
-        repeat_positions.append(key)
-print len(repeat_positions)
-
-
-
-# In[67]:
-
-print max(counter.values())
-
-
-# In[70]:
-
-for key in counter.keys():
-    if counter[key] == 464:
-        print key
-
-    
-
-
-# In[1]:
-
-import matplotlib.pyplot as plt
-get_ipython().magic('matplotlib inline')
-list = [2, 2, 1, 1, 1, 1, 3, 3, 3]
-plt.hist(list, bins = 3)
-plt.show()
+tp53.head()
 
 
 # In[6]:
 
-filename = 'https://dcc.icgc.org/api/v1/download?fn=/current/Projects/PAEN-AU/meth_array.PAEN-AU.tsv.gz'
-f = 'https://dcc.icgc.org/api/v1/download?fn=/current/Projects/PAEN-AU/meth_array.PAEN-AU.tsv.gz'
-print("finished reading and pickling " + f[len(f) - 14:-6])
+pbca = pd.read_csv('PBCA_expanded.tsv', sep='\t')
+maly = pd.read_csv('MALY_expanded.tsv', sep='\t')
+clle = pd.read_csv('CLLE_expanded.tsv', sep='\t')
 
 
-# In[14]:
+# In[7]:
+
+locations = []
+for chrom, start, stop in zip(list(pbca['chromosome']), list(pbca['start']), list(pbca['stop'])):
+    locations.append((chrom, start, stop))
+pbca['location'] = locations
+
+locations = []
+for chrom, start, stop in zip(list(maly['chromosome']), list(maly['start']), list(maly['stop'])):
+    locations.append((chrom, start, stop))
+maly['location'] = locations
 
 
-numMethylated = 240
-print ('Number of methylated sites for ' + f[len(f) - 14:-7] + ': %d' %(numMethylated))   
-print ('Number of total methylated sites across all cancer types: %d ' %(numMethylated))
-print ('Number of total methylated sites across all cancer types that fall into the coding regions of genes: %d' %(numMethylated))
+# In[8]:
+
+import numpy as np
+grouped = pbca['methylation_ratio'].groupby(pbca['location'])
+pbca_grouped = grouped.agg([np.mean, np.std])
+pbca_grouped.reset_index(inplace=True)
+
+grouped = maly['methylation_ratio'].groupby(maly['location'])
+maly_grouped = grouped.agg([np.mean, np.std])
+maly_grouped.reset_index(inplace=True)
+
+
+
+# In[11]:
+
+maly_grouped.head()
+
+
+# In[ ]:
+
+pbca_avgBeta = {}
+maly_avgBeta = {}
+for location, mean, std in zip(pbca_grouped['location'], pbca_grouped['mean'], pbca_grouped['std']):
+    pbca_avgBeta[str(location)] = (mean, std)
+
+for location, mean, std in zip(maly_grouped['location'], maly_grouped['mean'], maly_grouped['std']):
+    maly_avgBeta[str(location)] = (mean, std)
+
+
+# In[15]:
+
+print (maly_avgBeta.keys())
+
+
+# In[16]:
+
+df = pd.read_csv('all_hotspots.tsv', sep='\t')
+
+
+# In[43]:
+
+df.head()
+
+
+# In[17]:
+
+pbca = df[df['cancer_type'] == 'PBCA']
+maly = df[df['cancer_type'] == 'MALY']
+
+
+# In[23]:
+
+maly.head()
+
+
+# In[40]:
+
+pbca_means = []
+maly_means = []
+for x in pbca['location']:
+    location = x.replace("'", "")
+    if location in pbca_avgBeta.keys():
+        pbca_means.append(pbca_avgBeta[location])
+    
+for x in maly['location']:
+    location = x.replace("'", "")
+    if location in maly_avgBeta.keys():
+        maly_means.append(maly_avgBeta[location])
+
+
+# In[26]:
+
+print (maly_avgBeta[('chr11', '64572568', '64572569)])
+
+
+# In[41]:
+
+print (maly_means)
+
+
+# In[31]:
+
+print (('chr11', 64572568, 64572569) in maly_avgBeta.keys())
+
+
+# In[34]:
+
+for location in pbca['location']:
+    print (type(location[0]))
+    print (type(location[1]))
+    print (type(location[2]))
+    print (type(location))
+    break
 
 
 # In[ ]:
