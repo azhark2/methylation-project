@@ -5,20 +5,19 @@ import csv
 #             'chr15_cds_cpg.bed', 'chr16_cds_cpg.bed', 'chr17_cds_cpg.bed', 'chr18_cds_cpg.bed', 'chr19_cds_cpg.bed', 'chr20_cds_cpg.bed',
 #             'chr21_cds_cpg.bed', 'chr22_cds_cpg.bed']
 
-bed_files = []
-prefix = 'CpG_hg19_chr'
-suffix = '.bed'
-for i in range(1, 23):
-    bed_files.append(prefix + str(i) + suffix)
 
+# prefix = 'CpG_hg19_chr'
+# suffix = '.bed'
+# for i in range(1, 23):
+#     bed_files.append(prefix + str(i) + suffix)
 
-with open('all_cpgs.bed', 'w') as csvout:
-    csvout = csv.writer(csvout, delimiter='\t')
+bed_files = ['meth_seq_CLLE_cds.bed', 'meth_seq_MALY_cds.bed', 'meth_seq_PBCA_cds.bed']
+with open('meth_seq_cds', 'w') as csvout:
+    writer = csv.writer(csvout, delimiter='\t')
     for file in bed_files:
         with open(file, 'r') as f:
             reader = csv.reader(f, delimiter='\t')
             for row in reader:
-                print (len(row))
-                csvout.writerow([row[0], int(float(row[1])), int(float(row[2]))])
+                writer.writerow(row)
 
 

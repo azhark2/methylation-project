@@ -1,9 +1,11 @@
+from __future__ import division
 import pybedtools
 import pickle
 import csv
 import os
 
 cancerGeneToCpGDensity = {} #dictionary that maps each Cosmic census cancer gene to its CpG density(# of CpG's in coding region/length of coding region)
+noncancerGeneToCpGDensity = {}
 
 a = pybedtools.BedTool('cds.bed')
 b = pybedtools.BedTool('all_cds_cpgs_shifted_2.bed.noDuplicates')
@@ -26,7 +28,7 @@ def file_len(fname):
         return sum(1 for _ in f)
 
 
-with open('cancer_genes_hg19.bed', 'r') as f:
+with open('non_cancer_genes.bed', 'r') as f:
     reader = csv.reader(f, delimiter='\t')
     for row in reader:
         with open('temp_file.bed', 'w') as csvout:
@@ -41,9 +43,12 @@ with open('cancer_genes_hg19.bed', 'r') as f:
             print(row[0], row[1], row[2], row[3])
         else:
             density = num_cpgs / cds_length
-            cancerGeneToCpGDensity[row[3]] = density
+            print (num_cpgs)
+            noncancerGeneToCpGDensity[row[3]] = density
 
-pickle.dump(cancerGeneToCpGDensity, open('cancerGeneToCpGDensity.pickle', 'wb'))
+
+
+pickle.dump(noncancerGeneToCpGDensity, open('noncancerGeneToCpGDensity.pickle', 'wb'))
 
 
 
