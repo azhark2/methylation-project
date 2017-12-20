@@ -18,7 +18,7 @@ for file in all_ssms:
     df2 = df[(df.mutated_from_allele == 'G') & (df.mutated_to_allele == 'A')]
     df = pd.concat([df1, df2])
     cols = list(df.columns)
-    df = df[['chromosome', 'chromosome_start', 'chromosome_end', 'submitted_sample_id', 'mutated_from_allele', 'mutated_to_allele',  'consequence_type', 'gene_affected']]
+    df = df[['chromosome', 'chromosome_start', 'chromosome_end', 'submitted_sample_id', 'mutated_from_allele', 'mutated_to_allele', 'total_read_count', 'mutant_allele_read_count',  'consequence_type', 'gene_affected']]
     # df['chromosome'] = 'chr' + df['chromosome']
     df.fillna('MISSING', inplace=True)
     df.rename(columns={'submitted_sample_id': 'id'}, inplace=True)
