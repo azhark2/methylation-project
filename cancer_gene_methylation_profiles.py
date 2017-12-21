@@ -9,29 +9,25 @@ import fileinput
 
 def plot_profile(file, cancer_type, gene):
     df = pd.read_csv(file, sep='\t')
-    locations = []
-    for chrom, start, stop in zip(list(df['chromosome']), list(df['start']), list(df['stop'])):
-        locations.append((chrom, start, stop))
-    df['location'] = locations
-
-    grouped = df['methylation_ratio'].groupby(df['location'])
-    groupby = grouped.agg([np.mean, np.std])
+    df = pd.read_csv(file, sep='\t')
+    grouped = df.groupby('location')
+    groupby = grouped.agg({'methylation_ratio': [np.mean, np.std], 'prev_base': 'max'})
     groupby.reset_index(inplace=True)
-    groupby.to_csv(file[:-4] + '.tsv', sep='\t')
-    # plot
+    groupby.columns = groupby.columns.droplevel(0)
+    # groupby.to_csv(file[:-4] + '.tsv', sep='\t')
     y = groupby['mean']
     y_err = groupby['std']
-    avg = sum(y_err) / float(len(y_err))
-    genesToStdDev[gene] = (avg, list(y)) #dictionary with gene as key, tuple of avd std dev and list of means as value
-
     x = [i for i in range(1, groupby.shape[0] + 1)]
+    x_labels = [i + 'CG' for i in groupby['max']]
     fig = plt.figure(figsize=(20, 2))
     ax = fig.add_subplot(111)
     ax.set_xticks(x)
+    ax.set_xticklabels(x_labels, rotation='vertical', fontsize=12)
     ax.errorbar(x, y, yerr=y_err, fmt='o')
-    ax.set_xlabel('CpG #', fontsize=12)
-    ax.set_ylabel('Average Methylation Ratio', fontsize=12)
-    fig.savefig(cancer_type + row[3] + '_cds_CpGs.png')
+    ax.set_xlabel('Coordinate', fontsize=14)
+    ax.set_ylabel('Average Methylation Ratio', fontsize=14)
+    ax.scatter(x, y2, color='red')
+    ax.set_title('Methylation Profile of TP53 Coding Region in MALY', fontsize=16)
 
 
 
@@ -76,7 +72,7 @@ for file in MALY_files:
         print(line)
     plot_profile(file, "MALY_")
 
-           
+
 
 
 

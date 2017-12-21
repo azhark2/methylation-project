@@ -1,5 +1,5 @@
 import pandas as pd
-import pickle
+
 
 mutToFrequency = {} #key is bin, value is frequency of mutated CpG sites in this bin
 totalCpGFrequency = {} #key is bin, value is total frequency of CpG sites in this bin
@@ -65,13 +65,5 @@ def bin(binToFrequency, ratios):
         if 1 not in binToFrequency.keys():
             binToFrequency[1] = 0
         binToFrequency[1] += 1
-
-df = pd.read_csv('PBCA_cds_average_methylation.tsv', sep='\t')
-mut = pd.read_csv('temp.bed.noDuplicates.tsv', sep='\t')
-
-means = df['mean']
-means2 = mut['mean']
-
-bin(totalCpGFrequency, means)
-bin(mutToFrequency, means2)
-
+pd.read_csv()
+bin()
