@@ -12,37 +12,40 @@ a = pybedtools.BedTool('cds_canonical.bed')
 b = pybedtools.BedTool('all_CpGs.bed')
 
 def process(row):
-        with open(row[3] + '.bed', 'w') as csvout:
-                #get all cds corresponding to gene
-                writer = csv.writer(csvout, delimiter='\t')
-                writer.writerow([row[0], row[1], row[2], row[3]])
+        try:
+            	with open(row[3] + '.bed', 'w') as csvout:
+                        # get all cds corresponding to gene
+                        writer = csv.writer(csvout, delimiter='\t')
+                        writer.writerow([row[0], row[1], row[2], row[3]])
 
-        a.intersect(row[3] + '.bed').saveas(row[3] + '_cds.bed')
-        file = row[3] + '_cds.bed'
+                a.intersect(row[3] + '.bed').saveas(row[3] + '_cds.bed')
+                file = row[3] + '_cds.bed'
 
-        #get cds length
-        cds_length = 0
-        if os.stat(file).st_size != 0:
-                with open(file, 'r') as f2:
-                        reader2 = csv.reader(f2, delimiter='\t')
-                        for row2 in reader2:
-                                length = int(row2[2]) - int(row2[1])
-                                cds_length += length
-        print(cds_length)
+                # get cds length
+                cds_length = 0
+                if os.stat(file).st_size != 0:
+                        with open(file, 'r') as f2:
+                                reader2 = csv.reader(f2, delimiter='\t')
+                                for row2 in reader2:
+                                        length = int(row2[2]) - int(row2[1])
+                                        cds_length += length
+                print(cds_length)
 
-        #now get number of CpGs in the cds
-        b.intersect(row[3] + '_cds.bed').saveas(row[3] + '_cds_CpGs.bed')
-        with open(row[3] + '_cds_CpGs.bed') as f3:
-                num_cpgs = sum(1 for _ in f3)
+                # now get number of CpGs in the cds
+                b.intersect(row[3] + '_cds.bed').saveas(row[3] + '_cds_CpGs.bed')
+                with open(row[3] + '_cds_CpGs.bed') as f3:
+                        num_cpgs = sum(1 for _ in f3)
 
-        if cds_length == 0:
-                print(row[0], row[1], row[2], row[3] + ' had cds length of 0')
-        else:
-             	if num_cpgs == 0:
-                        print (row[0], row[1], row[2], row[3] + ' had 0 CpGs')
-                density = num_cpgs / cds_length
-                print (num_cpgs)
-                noncancerGeneToCpGDensity[row[3]] = density
+                if cds_length == 0:
+                        print(row[0], row[1], row[2], row[3] + ' had cds length of 0')
+                else:
+                     	if num_cpgs == 0:
+                                print(row[0], row[1], row[2], row[3] + ' had 0 CpGs')
+                        density = num_cpgs / cds_length
+                        print(num_cpgs)
+                        noncancerGeneToCpGDensity[row[3]] = density
+        except IOError:
+                print ("oops file did not exist")
 
 if __name__ == '__main__':
         with open('non_cancer_genes.bed', 'r') as f:
