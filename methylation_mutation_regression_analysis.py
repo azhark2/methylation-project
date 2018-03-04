@@ -107,6 +107,7 @@ def plot():
 # mutated_sites = ['GASTRIC-COMBINEDmethylation_mutation.bed', 'GASTRIC-COMBINEDmethylation_mutation_cds.bed', 'COAD-USmethylation_mutation.bed', 'COAD-USmethylation_mutation_cds.bed', 'LIVER-COMBINEDmethylation_mutation.bed', 'LIVER-COMBINEDmethylation_mutation_cds.bed', 'LUNG-COMBINEDmethylation_mutation.bed', 'LUNG-COMBINEDmethylation_mutation_cds.bed', 'CLLE-ESmethylation_mutation.bed', 'CLLE-ESmethylation_mutation_cds.bed', 'OV-USmethylation_mutation.bed', 'OV-USmethylation_mutation_cds.bed']
 all_sites = ['GSM1127125_UCSF-UBC.Breast_Luminal_Epithelial_Cells.Bisulfite-Seq.RM066.wig.bed.non_cds', 'GSM1127125_UCSF-UBC.Breast_Luminal_Epithelial_Cells.Bisulfite-Seq.RM066.wig.bed.cds', 'GSM983651_UCSD.Pancreas.Bisulfite-Seq.STL003.wig.bed.non_cds', 'GSM983651_UCSD.Pancreas.Bisulfite-Seq.STL003.wig.bed.cds', 'GSM1010979_UCSD.Thymus.Bisulfite-Seq.STL001.wig.bed.non_cds', 'GSM1010979_UCSD.Thymus.Bisulfite-Seq.STL001.wig.bed.cds']
 mutated_sites = ['BRCA-USmethylation_mutation.bed', 'BRCA-USmethylation_mutation_cds.bed', 'PANCREAS-COMBINEDmethylation_mutation.bed', 'PANCREAS-COMBINEDmethylation_mutation_cds.bed', 'MALY-DEmethylation_mutation.bed', 'MALY-DEmethylation_mutation_cds.bed']
+
 for file1, file2 in zip(all_sites, mutated_sites):
     df = pd.read_csv(file1, sep='\t', header=None)
     mut = pd.read_csv(file2, sep='\t', header=None)

@@ -1,4 +1,5 @@
 from __future__ import division
+from multiprocessing import Pool
 import pybedtools
 import pickle
 import csv
@@ -7,59 +8,48 @@ import os
 cancerGeneToCpGDensity = {} #dictionary that maps each Cosmic census cancer gene to its CpG density(# of CpG's in coding region/length of coding region)
 noncancerGeneToCpGDensity = {}
 
-a = pybedtools.BedTool('cds.bed')
-b = pybedtools.BedTool('all_cds_cpgs_shifted_2.bed.noDuplicates')
+a = pybedtools.BedTool('cds_canonical.bed')
+b = pybedtools.BedTool('all_CpGs.bed')
 
-#returns total length of cds
-def get_cds_length(file):
-    if os.stat(file).st_size == 0:
-        return 0
-    total_length = 0
-    with open(file, 'r') as f:
-        reader = csv.reader(f, delimiter='\t')
-        for row in reader:
-            length = int(row[2]) - int(row[1])
-            total_length += length
-        return total_length
+def process(row):
+        try:
+            	with open(row[3] + '.bed', 'w') as csvout:
+                        # get all cds corresponding to gene
+                        writer = csv.writer(csvout, delimiter='\t')
+                        writer.writerow([row[0], row[1], row[2], row[3]])
 
+                a.intersect(row[3] + '.bed').saveas(row[3] + '_cds.bed')
+                file = row[3] + '_cds.bed'
 
-def file_len(fname):
-    with open(fname) as f:
-        return sum(1 for _ in f)
+                # get cds length
+                cds_length = 0
+                if os.stat(file).st_size != 0:
+                        with open(file, 'r') as f2:
+                                reader2 = csv.reader(f2, delimiter='\t')
+                                for row2 in reader2:
+                                        length = int(row2[2]) - int(row2[1])
+                                        cds_length += length
+                print(cds_length)
 
+                # now get number of CpGs in the cds
+                b.intersect(row[3] + '_cds.bed').saveas(row[3] + '_cds_CpGs.bed')
+                with open(row[3] + '_cds_CpGs.bed') as f3:
+                        num_cpgs = sum(1 for _ in f3)
 
-with open('non_cancer_genes.bed', 'r') as f:
-    reader = csv.reader(f, delimiter='\t')
-    for row in reader:
-        with open('temp_file.bed', 'w') as csvout:
-            #get all cds corresponding to gene
-            writer = csv.writer(csvout, delimiter='\t')
-            writer.writerow([row[0], row[1], row[2], row[3]])
-        a.intersect('temp_file.bed').saveas('temp2.bed')
-        cds_length = get_cds_length('temp2.bed')
-        b.intersect('temp2.bed').saveas('temp3.bed')
-        num_cpgs = file_len('temp3.bed')
-        if cds_length == 0:
-            print(row[0], row[1], row[2], row[3])
-        else:
-            density = num_cpgs / cds_length
-            print (num_cpgs)
-            noncancerGeneToCpGDensity[row[3]] = density
+                if cds_length == 0:
+                        print(row[0], row[1], row[2], row[3] + ' had cds length of 0')
+                else:
+                     	if num_cpgs == 0:
+                                print(row[0], row[1], row[2], row[3] + ' had 0 CpGs')
+                        density = num_cpgs / cds_length
+                        print(num_cpgs)
+                        noncancerGeneToCpGDensity[row[3]] = density
+        except IOError:
+                print ("oops file did not exist")
 
-
-
-pickle.dump(noncancerGeneToCpGDensity, open('noncancerGeneToCpGDensity.pickle', 'wb'))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+        with open('non_cancer_genes.bed', 'r') as f:
+                reader = csv.reader(f, delimiter='\t')
+                pool = Pool()  # Create a multiprocessing Pool
+                pool.map(process, reader) # process data_inputs iterable with pool
+                pickle.dump(noncancerGeneToCpGDensity, open('noncancerGeneToCpGDensity.pickle', 'wb'))

@@ -1,7 +1,7 @@
 import pandas as pd
 import pybedtools
 
-ssm_files = ['CLLE-ES_mutation.bed', 'PBCA-DE_mutation.bed', 'MALY-DE_mutation.bed']
+ssm_files = ['CLLE-ES_mutation.bed.all.noDuplicates', 'PBCA-DE_mutation.bed.all.noDuplicates', 'MALY-DE_mutation.bed.all.noDuplicates']
 wgbs_files = ['CLLE_expanded.tsv', 'PBCA_expanded.tsv', 'MALY_expanded.tsv']
 
 mutations = []
@@ -31,8 +31,10 @@ for wgbs_file, ssm_file in zip(wgbs_files, ssm_files):
 
     #intersect methylation and mutation files matched by sample using Pybedtools wrapper around Bedtools
     for mut, meth in zip(mutations, methylation):
-        a = pybedtools.BedTool(meth)
-        a.intersect(mut).saveas(mut.split('.')[0] + 'hotspots2.bed') #finds all mutations in cds where methylation data is available
+        a = pybedtools.BedTool(mut)
+        a.intersect(meth).saveas(meth.split('.')[0] + 'overlaps.bed') #finds all mutations in cds where methylation data is available
+
+
 
 
 

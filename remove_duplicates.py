@@ -3,9 +3,6 @@ import sys
 
 #remove duplicates in bed files
 
-if len(sys.argv) > 1:
-        file = sys.argv[1]
-
 def remove(*args):
         duplicates = set([])
         count = 0
@@ -15,11 +12,18 @@ def remove(*args):
                                 reader = csv.reader(f, delimiter='\t')
                                 writer = csv.writer(csvout, delimiter='\t')
                                 for row in reader:
-                                        info = (row[0], row[1], row[2], row[3])
+                                        info = (row[2], row[3], row[4])
                                         if info not in duplicates:
                                                 duplicates.add(info)
                                                 writer.writerow(row)
                                         else:
-                                             	count += 1
+                                                count += 1
 
-                                print ("There were %d duplicates found" %count)
+                                print("There were %d duplicates found" % count)
+
+
+if len(sys.argv) > 1:
+        file = sys.argv[1]
+        remove(file)
+
+
