@@ -21,7 +21,8 @@ bedtools slop -i meth_seq_MALY.bed -g /data/khandekara2/bed_CpGs/hg19.fa.fai -l 
 bedtools shift -i temp.bed -g /data/khandekara2/bed_CpGs/hg19.fa.fai -s -1 > meth_seq_MALY_processed.bed
 bedtools getfasta -fi /data/khandekara2/bed_CpGs/hg19.fa -bed meth_seq_MALY_processed.bed -bedOut > temp.bed
 python fix_MALY.py
-
+python remove_duplicates.py MALY_cds.bed
+mv MALY_cds.bed.noDuplicates MALY_cds.bed
 
 
 #convert2bed < $f > $f.bed
