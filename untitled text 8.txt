@@ -1,9 +1,0 @@
-PANCREAS-COMBINED_mutation.bed.all.noDuplicates
-LUNG-COMBINED_mutation.bed.all.noDuplicates
-GASTRIC-COMBINED_mutation.bed.all.noDuplicates
-LIVER-COMBINED_mutation.bed.all.noDuplicates
-
-
-/data/khandekara2/normal_WGBS/processed_data/GSM1010979_UCSD.Thymus.Bisulfite-Seq.STL001.wig.bed 
-
-sed -n "p;N;" $f > temp.temp
